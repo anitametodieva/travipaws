@@ -1,11 +1,13 @@
-function App() {
+import Header from "./components/Header/Header";
+import Hero from "./components/Hero/Hero";
 
+function App() {
   return (
     <>
-      <h1>Travipaws</h1>
-      <p>Your pet-friendly travel community.</p>
+      <Header />
+      <Hero />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
