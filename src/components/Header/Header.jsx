@@ -1,32 +1,33 @@
 import './Header.css';
 import { FaPaw } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
 
 export default function Header() {
     return (
         <header className="site-header">
             <div className="header-container">
-                <a href="/" className="logo">
+                <NavLink to="/" className="logo">
                     <FaPaw className="logo-icon" />
                     <span>Travipaws</span>
-                </a>
+                </NavLink>
 
                 <nav className="navigation">
-                    <a href="/" className="nav-link active">
+                    <NavLink to="/" end className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                         Home
-                    </a>
+                    </NavLink>
 
-                    <a href="/trips" className="nav-link">
+                    <NavLink to="/trips" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                         Explore
-                    </a>
+                    </NavLink>
 
-                    <a href="/about" className="nav-link">
+                    <NavLink to="/about" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                         About
-                    </a>
+                    </NavLink>
                 </nav>
 
                 <div className="auth-actions">
-                    <button className="login-button">Login</button>
-                    <button className="register-button">Register</button>
+                    <NavLink to="/login" className="login-button">Login</NavLink>
+                    <NavLink to="/register" className="register-button">Register</NavLink>
                 </div>
             </div>
         </header>
