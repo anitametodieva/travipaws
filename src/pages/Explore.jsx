@@ -2,6 +2,24 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
 
+function getCoverImage(trip) {
+  if (trip.image_url) {
+    return trip.image_url;
+  }
+
+  if (Array.isArray(trip.images) && trip.images.length > 0) {
+    const firstImage = trip.images[0];
+
+    const { data } = supabase.storage
+      .from("trip-images")
+      .getPublicUrl(firstImage);
+
+    return data.publicUrl;
+  }
+
+  return null;
+}
+
 function Explore() {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,21 +61,31 @@ function Explore() {
         <p>No trips available yet.</p>
       ) : (
         <div className="trips-grid">
-          {trips.map((trip) => (
-            <article key={trip.id} className="trip-card">
-              {trip.image_url && <img src={trip.image_url} alt={trip.title} />}
+          {trips.map((trip) => {
+            const coverImage = getCoverImage(trip);
 
-              <h2>{trip.title}</h2>
+            return (
+              <article key={trip.id} className="trip-card">
+                {coverImage && (
+                  <img
+                    src={coverImage}
+                    alt={trip.title}
+                    className="trip-card-image"
+                  />
+                )}
 
-              <p>
-                {trip.location}, {trip.country}
-              </p>
+                <h2>{trip.title}</h2>
 
-              <p>{trip.description}</p>
+                <p>
+                  📍 {trip.location}, {trip.country}
+                </p>
 
-              <Link to={`/trips/${trip.id}`}>View Details</Link>
-            </article>
-          ))}
+                <p>{trip.description}</p>
+
+                <Link to={`/trips/${trip.id}`}>View Details</Link>
+              </article>
+            );
+          })}
         </div>
       )}
     </section>
