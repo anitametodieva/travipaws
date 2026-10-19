@@ -1,5 +1,67 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "../services/supabaseClient";
+
 function Explore() {
-    return <h1>Explore Page</h1>;
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchTrips() {
+      const { data, error } = await supabase
+        .from("trips")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching trips:", error);
+        setError(error.message);
+      } else {
+        setTrips(data);
+      }
+
+      setLoading(false);
+    }
+
+    fetchTrips();
+  }, []);
+
+  if (loading) {
+    return <p>Loading trips...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
+  return (
+    <section className="explore-page">
+      <h1>Explore Pet-Friendly Trips</h1>
+
+      {trips.length === 0 ? (
+        <p>No trips available yet.</p>
+      ) : (
+        <div className="trips-grid">
+          {trips.map((trip) => (
+            <article key={trip.id} className="trip-card">
+              {trip.image_url && <img src={trip.image_url} alt={trip.title} />}
+
+              <h2>{trip.title}</h2>
+
+              <p>
+                {trip.location}, {trip.country}
+              </p>
+
+              <p>{trip.description}</p>
+
+              <Link to={`/trips/${trip.id}`}>View Details</Link>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
 }
 
 export default Explore;
