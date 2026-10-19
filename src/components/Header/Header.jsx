@@ -1,35 +1,90 @@
-import './Header.css';
-import { FaPaw } from 'react-icons/fa';
-import { NavLink } from 'react-router-dom';
+import "./Header.css";
+import { FaPaw } from "react-icons/fa";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../services/supabaseClient";
 
 export default function Header() {
-    return (
-        <header className="site-header">
-            <div className="header-container">
-                <NavLink to="/" className="logo">
-                    <FaPaw className="logo-icon" />
-                    <span>Travipaws</span>
-                </NavLink>
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
-                <nav className="navigation">
-                    <NavLink to="/" end className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        Home
-                    </NavLink>
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
 
-                    <NavLink to="/trips" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        Explore
-                    </NavLink>
+    if (error) {
+      console.error("Logout error:", error.message);
+      return;
+    }
 
-                    <NavLink to="/about" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        About
-                    </NavLink>
-                </nav>
+    navigate("/");
+  }
 
-                <div className="auth-actions">
-                    <NavLink to="/login" className="login-button">Login</NavLink>
-                    <NavLink to="/register" className="register-button">Register</NavLink>
-                </div>
-            </div>
-        </header>
-    );
+  return (
+    <header className="site-header">
+      <div className="header-container">
+        <NavLink to="/" className="logo">
+          <FaPaw className="logo-icon" />
+          <span>Travipaws</span>
+        </NavLink>
+
+        <nav className="navigation">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Home
+          </NavLink>
+
+          <NavLink
+            to="/trips"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Explore
+          </NavLink>
+
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            About
+          </NavLink>
+        </nav>
+
+        <div className="auth-actions">
+          {loading ? null : user ? (
+            <>
+              <NavLink to="/trips/create" className="register-button">
+                Create Trip
+              </NavLink>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="login-button"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className="login-button">
+                Login
+              </NavLink>
+
+              <NavLink to="/register" className="register-button">
+                Register
+              </NavLink>
+            </>
+          )}
+        </div>
+      </div>
+    </header>
+  );
 }
