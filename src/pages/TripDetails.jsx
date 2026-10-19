@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../services/supabaseClient";
 import "./TripDetails.css";
 
 function TripDetails() {
   const { id } = useParams();
+  const { user } = useAuth();
 
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -80,6 +82,9 @@ function TripDetails() {
       <Link to="/trips">← Back to Explore</Link>
 
       <h1>{trip.title}</h1>
+      {user?.id === trip.owner_id && (
+        <Link to={`/trips/${trip.id}/edit`}>✏️ Edit Trip</Link>
+      )}
 
       <p>
         📍 {trip.location}, {trip.country}
