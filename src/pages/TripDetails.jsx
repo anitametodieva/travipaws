@@ -16,10 +16,19 @@ function TripDetails() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [likesCount, setLikesCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesLoading, setLikesLoading] = useState(true);
+  const [likeSaving, setLikeSaving] = useState(false);
+  const [likeError, setLikeError] = useState("");
 
   useEffect(() => {
+    setSelectedImage(0);
+    setIsLightboxOpen(false);
+
     async function fetchTrip() {
       setLoading(true);
+      setError(null);
 
       const { data, error } = await supabase
         .from("trips")
@@ -38,6 +47,31 @@ function TripDetails() {
 
     fetchTrip();
   }, [id]);
+
+  useEffect(() => {
+    async function fetchLikes() {
+      setLikesLoading(true);
+      setLikeError("");
+
+      const { data, error } = await supabase
+        .from("likes")
+        .select("user_id")
+        .eq("trip_id", id);
+
+      if (error) {
+        setLikeError(error.message);
+      } else {
+        setLikesCount(data.length);
+        setIsLiked(
+          user ? data.some((like) => like.user_id === user.id) : false,
+        );
+      }
+
+      setLikesLoading(false);
+    }
+
+    fetchLikes();
+  }, [id, user?.id]);
 
   if (loading) {
     return <p>Loading trip...</p>;
@@ -128,6 +162,47 @@ function TripDetails() {
     navigate("/trips");
   };
 
+  const handleLike = async () => {
+    if (!user || likeSaving || likesLoading) {
+      return;
+    }
+
+    setLikeSaving(true);
+    setLikeError("");
+
+    if (isLiked) {
+      const { data, error } = await supabase
+        .from("likes")
+        .delete()
+        .eq("trip_id", id)
+        .eq("user_id", user.id)
+        .select("id");
+
+      if (error) {
+        setLikeError(error.message);
+      } else if (!data || data.length === 0) {
+        setLikeError("Like could not be removed.");
+      } else {
+        setIsLiked(false);
+        setLikesCount((prev) => Math.max(0, prev - 1));
+      }
+    } else {
+      const { error } = await supabase.from("likes").insert({
+        trip_id: id,
+        user_id: user.id,
+      });
+
+      if (error) {
+        setLikeError(error.message);
+      } else {
+        setIsLiked(true);
+        setLikesCount((prev) => prev + 1);
+      }
+    }
+
+    setLikeSaving(false);
+  };
+
   return (
     <section className="trip-details">
       <Link to="/trips">← Back to Explore</Link>
@@ -153,6 +228,23 @@ function TripDetails() {
       <p>
         📍 {trip.location}, {trip.country}
       </p>
+
+      <div className="trip-likes">
+        <button
+          type="button"
+          onClick={handleLike}
+          disabled={!user || likesLoading || likeSaving}
+          className={isLiked ? "like-btn liked" : "like-btn"}
+        >
+          {isLiked ? "❤️ Liked" : "🤍 Like"}
+        </button>
+
+        <span>{likesLoading ? "Loading likes..." : `${likesCount} likes`}</span>
+
+        {!user && <p>Log in to like this trip.</p>}
+
+        {likeError && <p className="error">{likeError}</p>}
+      </div>
 
       {images.length > 0 && (
         <div className="trip-gallery">
