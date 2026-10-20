@@ -1,0 +1,156 @@
+.about-page {
+  color: #26352c;
+}
+
+.about-hero {
+  text-align: center;
+  padding: 100px 20px;
+  background: linear-gradient(135deg, #eaf4e8, #f8f6ed);
+}
+
+.about-label,
+.about-section-heading span,
+.about-mission > span {
+  color: #4d8057;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 13px;
+}
+
+.about-hero h1 {
+  font-size: clamp(36px, 5vw, 60px);
+  max-width: 800px;
+  margin: 20px auto;
+  line-height: 1.2;
+}
+
+.about-hero p {
+  max-width: 600px;
+  margin: 0 auto 35px;
+  color: #657168;
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.about-primary-btn {
+  display: inline-block;
+  padding: 15px 30px;
+  background: #3f7650;
+  color: white;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.about-primary-btn:hover {
+  background: #2d5b3c;
+  transform: translateY(-2px);
+}
+
+.about-story,
+.about-features {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 90px 24px;
+}
+
+.about-section-heading {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.about-section-heading h2,
+.about-mission h2,
+.about-cta h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  margin: 15px 0;
+}
+
+.about-story > p {
+  max-width: 750px;
+  margin: 18px auto;
+  text-align: center;
+  color: #657168;
+  line-height: 1.9;
+  font-size: 17px;
+}
+
+.about-mission {
+  text-align: center;
+  padding: 85px 24px;
+  background: #f2f6ef;
+}
+
+.about-mission p {
+  max-width: 720px;
+  margin: 20px auto 0;
+  color: #657168;
+  line-height: 1.9;
+  font-size: 17px;
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.about-feature-card {
+  padding: 35px 28px;
+  background: #fff;
+  border: 1px solid #e5ebe3;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+.about-feature-icon {
+  font-size: 38px;
+  margin-bottom: 20px;
+}
+
+.about-feature-card h3 {
+  font-size: 21px;
+  margin-bottom: 15px;
+}
+
+.about-feature-card p {
+  color: #657168;
+  line-height: 1.7;
+}
+
+.about-cta {
+  text-align: center;
+  padding: 90px 24px;
+  background: #e8f2e5;
+}
+
+.about-cta p {
+  max-width: 600px;
+  margin: 15px auto 30px;
+  color: #657168;
+  line-height: 1.8;
+}
+
+@media (max-width: 768px) {
+  .about-hero {
+    padding: 70px 20px;
+  }
+
+  .about-story,
+  .about-features {
+    padding: 60px 20px;
+  }
+
+  .about-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-mission,
+  .about-cta {
+    padding: 65px 20px;
+  }
+}
