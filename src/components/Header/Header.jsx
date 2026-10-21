@@ -16,7 +16,7 @@ export default function Header() {
       return;
     }
 
-    navigate("/");
+    navigate("/login", { replace: true });
   }
 
   return (

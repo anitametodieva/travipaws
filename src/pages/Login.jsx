@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
-import { Link } from "react-router";
+import "./Auth.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -14,60 +14,97 @@ function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    if (loading) return;
+
     setError("");
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    setLoading(false);
+      if (loginError) {
+        if (loginError.message === "Invalid login credentials") {
+          setError("Incorrect email or password. Please try again.");
+        } else {
+          setError(loginError.message);
+        }
 
-    if (error) {
-      setError(error.message);
-      return;
+        return;
+      }
+
+      navigate("/");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    navigate("/");
   }
 
   return (
-    <main>
-      <h1>Login</h1>
+    <main className="auth-page">
+      <section className="auth-card">
+        <div className="auth-header">
+          <div className="auth-icon">🐾</div>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <h1>Welcome Back!</h1>
+
+          <p>
+            Log in to Travipaws and continue exploring the world with your furry
+            friend.
+          </p>
         </div>
 
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="login-email">Email Address</label>
 
-        {error && <p role="alert">{error}</p>}
+            <input
+              id="login-email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+          </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-        <p>
-          <Link to="/forgot-password">Forgot password?</Link>
+          <div className="auth-field">
+            <label htmlFor="login-password">Password</label>
+
+            <input
+              id="login-password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
+
+          <div className="auth-forgot">
+            <Link to="/forgot-password">Forgot password?</Link>
+          </div>
+
+          {error && (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button className="auth-button" type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        <p className="auth-links">
+          Don't have an account? <Link to="/register">Create an account</Link>
         </p>
-      </form>
+      </section>
     </main>
   );
 }
