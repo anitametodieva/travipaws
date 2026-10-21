@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import CreateTrip from "./pages/CreateTrip";
+import MyTrips from "./pages/MyTrips";
 import TripDetails from "./pages/TripDetails";
 import EditTrip from "./pages/EditTrip";
 import NotFound from "./pages/NotFound";
@@ -33,6 +34,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/trips/create" element={<CreateTrip />} />
           <Route path="/trips/:id/edit" element={<EditTrip />} />
+          <Route path="/my-trips" element={<MyTrips />} />
         </Route>
       </Route>
 

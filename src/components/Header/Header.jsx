@@ -78,6 +78,16 @@ export default function Header() {
                   Create Trip
                 </NavLink>
 
+                <NavLink
+                  to="/my-trips"
+                  className={({ isActive }) =>
+                    isActive ? "my-trips-button active" : "my-trips-button"
+                  }
+                  onClick={closeMenu}
+                >
+                  My Trips
+                </NavLink>
+
                 <button
                   type="button"
                   onClick={handleLogout}

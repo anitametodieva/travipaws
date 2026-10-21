@@ -90,7 +90,8 @@
 }
 
 .login-button,
-.register-button {
+.register-button,
+.my-trips-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -123,6 +124,24 @@
 
 .register-button:hover {
   background-color: #365a30;
+}
+
+/* MY TRIPS BUTTON */
+
+.my-trips-button {
+  background-color: #edf3e9;
+  color: #18392b;
+  border: 1px solid #c8d8c2;
+}
+
+.my-trips-button:hover {
+  background-color: #dce9d6;
+}
+
+.my-trips-button.active {
+  background-color: #dce9d6;
+  border-color: #476f3d;
+  color: #18392b;
 }
 
 /* =========================
@@ -216,7 +235,8 @@
   }
 
   .login-button,
-  .register-button {
+  .register-button,
+  .my-trips-button {
     width: 100%;
     min-height: 44px;
   }
