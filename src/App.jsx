@@ -14,6 +14,7 @@ import TripDetails from "./pages/TripDetails";
 import EditTrip from "./pages/EditTrip";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import GuestRoute from "./routes/GuestRoute";
 
 function App() {
   return (
@@ -22,9 +23,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/trips" element={<Explore />} />
         <Route path="/about" element={<About />} />
-        <Route path="/login" element={<Login />} />
+        <Route element={<GuestRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/trips/:id" element={<TripDetails />} />
         <Route element={<ProtectedRoute />}>
