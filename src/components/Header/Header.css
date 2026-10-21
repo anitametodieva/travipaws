@@ -1,87 +1,241 @@
+/* =========================
+   HEADER
+========================= */
+
 .site-header {
-    width: 100%;
-    background-color: #fffdf8;
-    border-bottom: 1px solid #ece9e2;
+  width: 100%;
+  background-color: #fffdf8;
+  border-bottom: 1px solid #ece9e2;
+  position: relative;
+  z-index: 100;
 }
 
 .header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 22px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 22px 24px;
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+/* =========================
+   LOGO
+========================= */
 
-    color: #18392b;
-    text-decoration: none;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+
+  color: #18392b;
+  text-decoration: none;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .logo-icon {
-    font-size: 28px;
-    color: #476f3d;
+  font-size: 28px;
+  color: #476f3d;
+}
+
+/* =========================
+   DESKTOP MENU
+========================= */
+
+.header-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 24px;
 }
 
 .navigation {
-    display: flex;
-    gap: 32px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin: 0 auto;
 }
 
 .nav-link {
-    color: #222;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 500;
-    padding-bottom: 4px;
+  color: #222;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  padding-bottom: 4px;
 }
 
 .nav-link:hover {
-    color: #476f3d;
+  color: #476f3d;
 }
 
 .nav-link.active {
-    color: #476f3d;
-    border-bottom: 2px solid #476f3d;
+  color: #476f3d;
+  border-bottom: 2px solid #476f3d;
 }
 
+/* =========================
+   AUTH BUTTONS
+========================= */
+
 .auth-actions {
-    display: flex;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .login-button,
 .register-button {
-    padding: 10px 22px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .login-button {
-    background-color: transparent;
-    color: #18392b;
-    border: 1px solid #6d846d;
+  background-color: transparent;
+  color: #18392b;
+  border: 1px solid #6d846d;
 }
 
 .register-button {
-    background-color: #476f3d;
-    color: white;
-    border: 1px solid #476f3d;
+  background-color: #476f3d;
+  color: white;
+  border: 1px solid #476f3d;
 }
 
 .login-button:hover {
-    background-color: #f4f3ee;
+  background-color: #f4f3ee;
 }
 
 .register-button:hover {
-    background-color: #365a30;
+  background-color: #365a30;
+}
+
+/* =========================
+   MOBILE TOGGLE
+========================= */
+
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  background: transparent;
+  border: 1px solid #dce5d8;
+  border-radius: 8px;
+
+  color: #18392b;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* =========================
+   TABLET / MOBILE
+========================= */
+
+@media (max-width: 900px) {
+  .header-container {
+    padding: 16px 20px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    font-size: 24px;
+  }
+
+  .logo-icon {
+    font-size: 24px;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .header-menu {
+    display: none;
+    flex-basis: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+
+    padding: 20px 0 8px;
+    border-top: 1px solid #ece9e2;
+  }
+
+  .header-menu.open {
+    display: flex;
+  }
+
+  .navigation {
+    width: 100%;
+    margin: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .nav-link {
+    display: block;
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    background-color: #edf3e9;
+  }
+
+  .nav-link.active {
+    border-bottom: none;
+  }
+
+  .auth-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .login-button,
+  .register-button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* =========================
+   SMALL PHONES
+========================= */
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 14px 16px;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+
+  .logo-icon {
+    font-size: 22px;
+  }
 }
