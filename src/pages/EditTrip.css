@@ -195,3 +195,122 @@
     font-size: 16px;
   }
 }
+
+/* Trip photos */
+
+.edit-trip-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edit-trip-photos h2 {
+  color: #18392b;
+  font-size: 21px;
+}
+
+.edit-trip-photos > p {
+  color: #6c716d;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.edit-trip-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.edit-trip-photo {
+  min-width: 0;
+  padding: 10px;
+  border: 2px solid #e1e7dd;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.edit-trip-photo.selected-cover {
+  border-color: #476f3d;
+  background: #f3f7f0;
+}
+
+.edit-trip-photo img {
+  display: block;
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.edit-trip-cover-badge {
+  display: block;
+  margin-top: 10px;
+  color: #476f3d;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .edit-trip-photo-grid {
+    gap: 10px;
+  }
+
+  .edit-trip-photo {
+    padding: 6px;
+  }
+
+  .edit-trip-photo img {
+    height: 120px;
+  }
+}
+
+/* Photo action buttons */
+
+.edit-trip-photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.edit-trip-cover-button,
+.edit-trip-remove-button {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-trip-cover-button {
+  background-color: #edf3e9;
+  color: #476f3d;
+  border: 1px solid #c8d8c2;
+}
+
+.edit-trip-cover-button:hover:not(:disabled) {
+  background-color: #dce9d6;
+}
+
+.edit-trip-cover-button:disabled {
+  cursor: default;
+}
+
+.edit-trip-remove-button {
+  background-color: #fff0f0;
+  color: #b52a37;
+  border: 1px solid #f4cccc;
+}
+
+.edit-trip-remove-button:hover:not(:disabled) {
+  background-color: #ffe0e0;
+}
+
+.edit-trip-remove-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

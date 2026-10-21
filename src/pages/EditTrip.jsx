@@ -18,6 +18,8 @@ function EditTrip() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [canEdit, setCanEdit] = useState(false);
+  const [existingImages, setExistingImages] = useState([]);
+  const [coverImage, setCoverImage] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -45,6 +47,21 @@ function EditTrip() {
           setCountry(data.country || "");
           setLocation(data.location || "");
           setDescription(data.description || "");
+
+          const tripImages = Array.isArray(data.images) ? data.images : [];
+
+          setExistingImages(tripImages);
+
+          const currentCover = tripImages.find((path) => {
+            const { data: imageData } = supabase.storage
+              .from("trip-images")
+              .getPublicUrl(path);
+
+            return imageData.publicUrl === data.image_url;
+          });
+
+          setCoverImage(currentCover || tripImages[0] || null);
+
           setCanEdit(true);
         }
       } catch {
@@ -71,6 +88,18 @@ function EditTrip() {
     };
   }, [id, user]);
 
+  function handleRemoveExistingImage(pathToRemove) {
+    const updatedImages = existingImages.filter(
+      (path) => path !== pathToRemove,
+    );
+
+    setExistingImages(updatedImages);
+
+    if (coverImage === pathToRemove) {
+      setCoverImage(updatedImages[0] || null);
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -93,6 +122,11 @@ function EditTrip() {
           country: country.trim(),
           location: location.trim(),
           description: description.trim(),
+          images: existingImages,
+          image_url: coverImage
+            ? supabase.storage.from("trip-images").getPublicUrl(coverImage).data
+                .publicUrl
+            : null,
         })
         .eq("id", id)
         .eq("owner_id", user.id)
@@ -213,6 +247,56 @@ function EditTrip() {
               required
               rows="6"
             />
+          </div>
+
+          <div className="edit-trip-photos">
+            <h2>Trip Photos</h2>
+            <p>Manage the photos of your adventure.</p>
+
+            {existingImages.length === 0 ? (
+              <p>No photos uploaded yet.</p>
+            ) : (
+              <div className="edit-trip-photo-grid">
+                {existingImages.map((path) => {
+                  const { data } = supabase.storage
+                    .from("trip-images")
+                    .getPublicUrl(path);
+
+                  return (
+                    <div
+                      key={path}
+                      className={`edit-trip-photo ${
+                        coverImage === path ? "selected-cover" : ""
+                      }`}
+                    >
+                      <img src={data.publicUrl} alt="Trip" />
+
+                      <div className="edit-trip-photo-actions">
+                        <button
+                          type="button"
+                          className="edit-trip-cover-button"
+                          onClick={() => setCoverImage(path)}
+                          disabled={saving || coverImage === path}
+                        >
+                          {coverImage === path
+                            ? "⭐ Cover Photo"
+                            : "Set as Cover"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="edit-trip-remove-button"
+                          onClick={() => handleRemoveExistingImage(path)}
+                          disabled={saving}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {error && (
