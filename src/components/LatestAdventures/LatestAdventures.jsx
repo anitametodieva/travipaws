@@ -1,85 +1,127 @@
-import './LatestAdventures.css';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "../../services/supabaseClient";
+import "./LatestAdventures.css";
 
-import switzerlandImage from '../../assets/images/trip-switzerland.jpg';
-import italyImage from '../../assets/images/trip-italy.jpg';
-import franceImage from '../../assets/images/trip-france.jpg';
+function getCoverImage(trip) {
+  if (trip.image_url) {
+    return trip.image_url;
+  }
 
-const adventures = [
-    {
-        id: 1,
-        country: 'Switzerland',
-        title: 'Adventure at Blausee',
-        description: 'Crystal-clear water, peaceful forest paths and a perfect day with Kiko and Suny.',
-        image: switzerlandImage,
-        rating: 5,
-    },
-    {
-        id: 2,
-        country: 'Italy',
-        title: 'Hidden Beach Adventure',
-        description: 'A beautiful pet-friendly escape surrounded by cliffs and turquoise water.',
-        image: italyImage,
-        rating: 5,
-    },
-    {
-        id: 3,
-        country: 'France',
-        title: 'Weekend in the French Alps',
-        description: 'Nature, peaceful walks and unforgettable moments with your pet.',
-        image: franceImage,
-        rating: 5,
-    },
-];
+  if (Array.isArray(trip.images) && trip.images.length > 0) {
+    const { data } = supabase.storage
+      .from("trip-images")
+      .getPublicUrl(trip.images[0]);
+
+    return data.publicUrl;
+  }
+
+  return null;
+}
 
 export default function LatestAdventures() {
-    return (
-        <section className="latest-adventures">
-            <div className="latest-container">
-                <div className="latest-heading">
-                    <div>
-                        <span className="section-label">Community stories</span>
-                        <h2>Latest Adventures</h2>
+  const [adventures, setAdventures] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function fetchLatestAdventures() {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("trips")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(3);
+
+        if (!active) return;
+
+        if (fetchError) {
+          setError("Could not load the latest adventures.");
+          console.error("Error loading adventures:", fetchError);
+        } else {
+          setAdventures(data ?? []);
+        }
+      } catch (err) {
+        if (active) {
+          setError("Could not load the latest adventures.");
+          console.error(err);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchLatestAdventures();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
+    <section className="latest-adventures">
+      <div className="latest-container">
+        <div className="latest-heading">
+          <div>
+            <span className="section-label">Community stories</span>
+            <h2>Latest Adventures</h2>
+          </div>
+
+          <Link to="/trips" className="view-all-link">
+            View all trips →
+          </Link>
+        </div>
+
+        {loading ? (
+          <p className="latest-message">Loading latest adventures...</p>
+        ) : error ? (
+          <p className="latest-message" role="alert">
+            {error}
+          </p>
+        ) : adventures.length === 0 ? (
+          <p className="latest-message">
+            No adventures yet. Be the first to share your trip!
+          </p>
+        ) : (
+          <div className="adventures-grid">
+            {adventures.map((adventure) => {
+              const coverImage = getCoverImage(adventure);
+
+              return (
+                <article className="adventure-card" key={adventure.id}>
+                  <div className="adventure-image-wrapper">
+                    {coverImage ? (
+                      <img
+                        src={coverImage}
+                        alt={adventure.title}
+                        className="adventure-image"
+                      />
+                    ) : (
+                      <div className="adventure-image-placeholder">🐾</div>
+                    )}
+                  </div>
+
+                  <div className="adventure-content">
+                    <span className="country-badge">{adventure.country}</span>
+
+                    <h3>{adventure.title}</h3>
+
+                    <p>{adventure.description}</p>
+
+                    <div className="adventure-footer">
+                      <Link to={`/trips/${adventure.id}`}>View trip →</Link>
                     </div>
-
-                    <a href="/trips" className="view-all-link">
-                        View all trips →
-                    </a>
-                </div>
-
-                <div className="adventures-grid">
-                    {adventures.map((adventure) => (
-                        <article className="adventure-card" key={adventure.id}>
-                            <div className="adventure-image-wrapper">
-                                <img
-                                    src={adventure.image}
-                                    alt={adventure.title}
-                                    className="adventure-image"
-                                />
-
-                                <span className="country-badge">
-                                    {adventure.country}
-                                </span>
-                            </div>
-
-                            <div className="adventure-content">
-                                <h3>{adventure.title}</h3>
-
-                                <p>{adventure.description}</p>
-
-                                <div className="adventure-footer">
-                                    <span className="rating">
-                                        {'★'.repeat(adventure.rating)}
-                                    </span>
-
-                                    <a href={`/trips/${adventure.id}`}>
-                                        View trip →
-                                    </a>
-                                </div>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }

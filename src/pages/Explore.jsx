@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
+import "./Explore.css";
 
 function getCoverImage(trip) {
   if (trip.image_url) {
