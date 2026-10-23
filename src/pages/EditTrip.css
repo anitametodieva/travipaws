@@ -314,3 +314,52 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Add new photos */
+
+.edit-trip-add-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid #e7e9e3;
+}
+
+.edit-trip-upload-label {
+  color: #18392b;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.edit-trip-add-photos input[type="file"] {
+  width: 100%;
+  max-width: 100%;
+  font-size: 13px;
+  color: #476f3d;
+}
+
+.edit-trip-photo-count {
+  margin: 0;
+  color: #6c716d;
+  font-size: 13px;
+}
+
+.edit-trip-add-photos h3 {
+  margin: 8px 0 0;
+  color: #18392b;
+  font-size: 16px;
+}
+
+.edit-trip-new-photo-label {
+  display: block;
+  margin-top: 10px;
+  color: #476f3d;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.edit-trip-new-photo-label {
+  margin-bottom: 10px;
+}

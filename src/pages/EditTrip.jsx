@@ -20,6 +20,19 @@ function EditTrip() {
   const [canEdit, setCanEdit] = useState(false);
   const [existingImages, setExistingImages] = useState([]);
   const [coverImage, setCoverImage] = useState(null);
+  const [newImages, setNewImages] = useState([]);
+  const [newImagePreviews, setNewImagePreviews] = useState([]);
+  const [newCoverIndex, setNewCoverIndex] = useState(null);
+
+  useEffect(() => {
+    const urls = newImages.map((file) => URL.createObjectURL(file));
+
+    setNewImagePreviews(urls);
+
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [newImages]);
 
   useEffect(() => {
     let active = true;
@@ -88,6 +101,63 @@ function EditTrip() {
     };
   }, [id, user]);
 
+  const handleRemoveNewImage = (indexToRemove) => {
+    setNewImages((prevImages) =>
+      prevImages.filter((_, index) => index !== indexToRemove),
+    );
+
+    setNewCoverIndex((prevIndex) => {
+      if (prevIndex === null) {
+        return null;
+      }
+
+      if (prevIndex === indexToRemove) {
+        return null;
+      }
+
+      if (indexToRemove < prevIndex) {
+        return prevIndex - 1;
+      }
+
+      return prevIndex;
+    });
+  };
+
+  const handleNewImagesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+
+    e.target.value = "";
+
+    if (files.length === 0) return;
+
+    setError("");
+
+    const totalImages = existingImages.length + newImages.length + files.length;
+
+    if (totalImages > 10) {
+      setError("You can have a maximum of 10 photos per trip.");
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    const invalidFile = files.find((file) => !allowedTypes.includes(file.type));
+
+    if (invalidFile) {
+      setError("Only JPG, PNG and WebP images are allowed.");
+      return;
+    }
+
+    const tooLarge = files.find((file) => file.size > 5 * 1024 * 1024);
+
+    if (tooLarge) {
+      setError("Each image must be smaller than 5 MB.");
+      return;
+    }
+
+    setNewImages((prevImages) => [...prevImages, ...files]);
+  };
+
   function handleRemoveExistingImage(pathToRemove) {
     const updatedImages = existingImages.filter(
       (path) => path !== pathToRemove,
@@ -112,9 +182,61 @@ function EditTrip() {
       return;
     }
 
+    if (
+      !title.trim() ||
+      !country.trim() ||
+      !location.trim() ||
+      !description.trim()
+    ) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    if (existingImages.length + newImages.length > 10) {
+      setError("You can have a maximum of 10 photos per trip.");
+      return;
+    }
+
     setSaving(true);
 
+    const uploadedPaths = [];
+    let tripUpdated = false;
+
     try {
+      for (const image of newImages) {
+        const fileExtension = image.name.split(".").pop().toLowerCase();
+        const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("trip-images")
+          .upload(filePath, image);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        uploadedPaths.push(filePath);
+      }
+
+      const updatedImages = [...existingImages, ...uploadedPaths];
+
+      const selectedNewCover =
+        newCoverIndex !== null ? uploadedPaths[newCoverIndex] : null;
+
+      const updatedCover =
+        selectedNewCover ||
+        (coverImage && updatedImages.includes(coverImage)
+          ? coverImage
+          : null) ||
+        updatedImages[0] ||
+        null;
+
+      const coverUrl = updatedCover
+        ? supabase.storage.from("trip-images").getPublicUrl(updatedCover).data
+            .publicUrl
+        : null;
+
       const { data, error: updateError } = await supabase
         .from("trips")
         .update({
@@ -122,29 +244,36 @@ function EditTrip() {
           country: country.trim(),
           location: location.trim(),
           description: description.trim(),
-          images: existingImages,
-          image_url: coverImage
-            ? supabase.storage.from("trip-images").getPublicUrl(coverImage).data
-                .publicUrl
-            : null,
+          images: updatedImages,
+          image_url: coverUrl,
         })
         .eq("id", id)
         .eq("owner_id", user.id)
         .select("id");
 
       if (updateError) {
-        setError(updateError.message);
-        return;
+        throw updateError;
       }
 
       if (!data || data.length === 0) {
-        setError("Trip could not be updated.");
-        return;
+        throw new Error("Trip could not be updated.");
       }
 
+      tripUpdated = true;
+
       navigate(`/trips/${id}`);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      if (!tripUpdated && uploadedPaths.length > 0) {
+        const { error: cleanupError } = await supabase.storage
+          .from("trip-images")
+          .remove(uploadedPaths);
+
+        if (cleanupError) {
+          console.error("Image cleanup failed:", cleanupError);
+        }
+      }
+
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -275,10 +404,16 @@ function EditTrip() {
                         <button
                           type="button"
                           className="edit-trip-cover-button"
-                          onClick={() => setCoverImage(path)}
-                          disabled={saving || coverImage === path}
+                          onClick={() => {
+                            setCoverImage(path);
+                            setNewCoverIndex(null);
+                          }}
+                          disabled={
+                            saving ||
+                            (coverImage === path && newCoverIndex === null)
+                          }
                         >
-                          {coverImage === path
+                          {coverImage === path && newCoverIndex === null
                             ? "⭐ Cover Photo"
                             : "Set as Cover"}
                         </button>
@@ -297,6 +432,73 @@ function EditTrip() {
                 })}
               </div>
             )}
+            <div className="edit-trip-add-photos">
+              <label
+                htmlFor="edit-new-images"
+                className="edit-trip-upload-label"
+              >
+                📷 Choose Photos
+              </label>
+
+              <input
+                id="edit-new-images"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                onChange={handleNewImagesChange}
+                disabled={
+                  saving || existingImages.length + newImages.length >= 10
+                }
+              />
+
+              <p className="edit-trip-photo-count">
+                {existingImages.length + newImages.length} / 10 photos (
+                {existingImages.length} saved, {newImages.length} new)
+              </p>
+
+              {newImagePreviews.length > 0 && (
+                <>
+                  <h3>New Photos</h3>
+
+                  <div className="edit-trip-photo-grid">
+                    {newImagePreviews.map((preview, index) => (
+                      <div className="edit-trip-photo" key={preview}>
+                        <img
+                          src={preview}
+                          alt={`New trip photo ${index + 1}`}
+                        />
+                        <span className="edit-trip-new-photo-label">
+                          New photo
+                        </span>
+
+                        <button
+                          type="button"
+                          className="edit-trip-cover-button"
+                          onClick={() => {
+                            setNewCoverIndex(index);
+                            setCoverImage(null);
+                          }}
+                          disabled={saving || newCoverIndex === index}
+                        >
+                          {newCoverIndex === index
+                            ? "⭐ Cover Photo"
+                            : "Set as Cover"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="edit-trip-remove-button"
+                          onClick={() => handleRemoveNewImage(index)}
+                          disabled={saving}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {error && (
