@@ -20,6 +20,7 @@ function EditTrip() {
   const [canEdit, setCanEdit] = useState(false);
   const [existingImages, setExistingImages] = useState([]);
   const [coverImage, setCoverImage] = useState(null);
+  const [originalImages, setOriginalImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [newImagePreviews, setNewImagePreviews] = useState([]);
   const [newCoverIndex, setNewCoverIndex] = useState(null);
@@ -64,6 +65,7 @@ function EditTrip() {
           const tripImages = Array.isArray(data.images) ? data.images : [];
 
           setExistingImages(tripImages);
+          setOriginalImages([...tripImages]);
 
           const currentCover = tripImages.find((path) => {
             const { data: imageData } = supabase.storage
@@ -148,10 +150,10 @@ function EditTrip() {
       return;
     }
 
-    const tooLarge = files.find((file) => file.size > 5 * 1024 * 1024);
+    const tooLarge = files.find((file) => file.size > 15 * 1024 * 1024);
 
     if (tooLarge) {
-      setError("Each image must be smaller than 5 MB.");
+      setError("Each image must be smaller than 15 MB.");
       return;
     }
 
@@ -260,6 +262,42 @@ function EditTrip() {
       }
 
       tripUpdated = true;
+
+      const removedPaths = originalImages.filter(
+        (path) =>
+          !updatedImages.includes(path) && path.startsWith(`${user.id}/`),
+      );
+
+      if (removedPaths.length > 0) {
+        const { data: otherTrips, error: checkError } = await supabase
+          .from("trips")
+          .select("images")
+          .neq("id", id);
+
+        if (checkError) {
+          console.error("Could not check image references:", checkError);
+        } else {
+          const usedElsewhere = new Set(
+            (otherTrips || []).flatMap((trip) =>
+              Array.isArray(trip.images) ? trip.images : [],
+            ),
+          );
+
+          const pathsToDelete = removedPaths.filter(
+            (path) => !usedElsewhere.has(path),
+          );
+
+          if (pathsToDelete.length > 0) {
+            const { error: deleteError } = await supabase.storage
+              .from("trip-images")
+              .remove(pathsToDelete);
+
+            if (deleteError) {
+              console.error("Could not delete unused photos:", deleteError);
+            }
+          }
+        }
+      }
 
       navigate(`/trips/${id}`);
     } catch (err) {

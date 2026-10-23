@@ -50,10 +50,10 @@ function CreateTrip() {
       return;
     }
 
-    const tooLarge = files.find((file) => file.size > 5 * 1024 * 1024);
+    const tooLarge = files.find((file) => file.size > 15 * 1024 * 1024);
 
     if (tooLarge) {
-      setError("Each image must be smaller than 5 MB.");
+      setError("Each image must be smaller than 15 MB.");
       e.target.value = "";
       return;
     }
@@ -250,7 +250,7 @@ function CreateTrip() {
 
               <p>
                 Add up to 10 photos of your adventure. JPG, PNG or WebP, maximum
-                5 MB each.
+                15 MB each.
               </p>
             </div>
 
