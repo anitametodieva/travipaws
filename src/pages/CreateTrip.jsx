@@ -114,9 +114,13 @@ function CreateTrip() {
         const fileName = `${crypto.randomUUID()}.${fileExtension}`;
         const filePath = `${user.id}/${fileName}`;
 
+        const fileData = await image.arrayBuffer();
+
         const { error: uploadError } = await supabase.storage
           .from("trip-images")
-          .upload(filePath, image);
+          .upload(filePath, fileData, {
+            contentType: image.type,
+          });
 
         if (uploadError) {
           throw uploadError;
